@@ -14,5 +14,23 @@ app.use('/', (req,res) => {
     res.render('templates/index.html');
 });
 
+let messages= [];
+
+io.on('connection', socket => {
+    
+    console.log(`Conection with ${socket.id} socket`);
+
+    socket.emit('showPreviousMessages', messages);
+
+
+    socket.on('sendMessage', data => {
+
+        messages.push(data);
+        socket.broadcast.emit('receivedMessage', data);
+
+    });
+
+});
+
 
 server.listen(3000, () => console.log('Server ON'));

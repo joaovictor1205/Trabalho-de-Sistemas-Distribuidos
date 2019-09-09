@@ -35,3 +35,8 @@
 label{
     text-align: left;
 }
+
+#messages{
+    margin-top: 5px;
+    text-align: left;
+}
