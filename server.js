@@ -1,18 +1,7 @@
-const express = require('express')
-const path = require('path')
-
-const app = express();
-const server = require('http').createServer(app)
-const io = require('socket.io')(server);
-
-app.use(express.static(path.join(__dirname, 'public')));
-app.set('views', path.join(__dirname, 'public'));
-app.engine('html', require('ejs').renderFile);
-app.set('view engine', 'html')
-
-app.use('/', (req,res) => {
-    res.render('templates/index.html');
-});
+const serverVariables = require('./server/configserver.js')
+const app = serverVariables.app;
+const io = serverVariables.io;
+const server = serverVariables.server;
 
 let messages= [];
 
@@ -21,7 +10,6 @@ io.on('connection', socket => {
     console.log(`Conection with ${socket.id} socket`);
 
     socket.emit('showPreviousMessages', messages);
-
 
     socket.on('sendMessage', data => {
 
@@ -32,5 +20,6 @@ io.on('connection', socket => {
 
 });
 
-
-server.listen(3000, () => console.log('Server ON'));
+const PORT = 3000;
+const HOST = 'localhost';
+server.listen(PORT, HOST, () => console.log(`Server ON ${HOST}:${PORT}`));

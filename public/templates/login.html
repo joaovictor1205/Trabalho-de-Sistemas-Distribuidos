@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title> TinderIN </title>
+    <link rel="shortcut icon" href="../img/logo.png">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="../css/login.css">
+
+</head>
+<body>
+
+    <div class="container my-container">
+
+        <div class="row my-row">
+
+            <div class="col-md-4 my-col">
+
+                <div class="card  mb-3" style="max-width: 40rem;"> 
+
+                    <div class="card-header"> <img src="../img/logo.png" id="foto" alt="logo"> </div>
+                        
+                    <div class="card-body">
+                        <h5 class="card-title">Sign Up</h1>
+                        <a href="../register"> <button class="btn btn-outline-dark">Register</button> </a>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-8 my-col">
+
+                    <div class="card mb-3" style="max-width: 40rem;">
+    
+                            <div class="card-header"> Login </div>
+
+                        <form id="chat">
+
+                            <fieldset class="my-fieldset">
+
+                                <div class="form-group row">
+                                    <label for="user" class="col-md-3">User</label>
+                                    <div class="col-sm-8">
+                                        <input type="text" name="user" class="form-control" placeholder="Insert your username" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="message" class="col-md-3">Password</label>
+                                    <div class="col-sm-8">
+                                        <input type="password" name="password" class="form-control" placeholder="Insert your password" required>
+                                    </div>
+
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="col text-center">
+                                    <div id="buttons">
+                                        <button type="submit" class="btn btn-outline-success">Enter</button>
+                                        <button type="reset" class="btn btn-outline-danger">Cancel</button>
+                                    </div>
+                                    </div>
+                                </div>
+
+                            </fieldset>
+
+                        </form>
+
+                    </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script type="text/javascript">
+        var socket = io('http://localhost:3000');
+
+        function renderMessage(message){
+            $('#messages').append('<div class="message"><strong>'+ message.user+'</strong>: '+message.message+'</div>');
+        }
+
+        socket.on('showPreviousMessages', function(messages){
+            for(message of messages){
+                renderMessage(message);
+            }
+        });
+
+        socket.on('receivedMessage', function(message){
+            renderMessage(message);
+        });
+
+
+        $('#chat').submit(function(event){
+            event.preventDefault();
+
+            var user = $('input[name=user]').val();
+            var message = $('textarea[name=message]').val();
+
+                var messageObject = {
+                    user: user,
+                    message: message,
+            };
+
+            renderMessage(messageObject);
+
+            socket.emit('sendMessage', messageObject);
+
+        });
+
+    </script>
+    
+</body>
+</html>
