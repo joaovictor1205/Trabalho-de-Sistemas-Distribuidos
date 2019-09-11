@@ -1,7 +1,7 @@
 const serverVariables = require('./server/configserver.js')
 const io = serverVariables.io;
 const server = serverVariables.server;
-const archive = require('fs');
+const archive = require('fs')
 
 let messages= [];
 
