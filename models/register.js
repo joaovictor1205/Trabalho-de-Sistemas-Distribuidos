@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 
-const ProjectSchema = new mongoose.Schema({
+/*const ProjectSchema = new mongoose.Schema({
 
     name:{
         type: String,
@@ -39,3 +39,4 @@ ProjectSchema.pre('save', async function(next){
 const Project = mongoose.model('Project', ProjectSchema);
 
 module.exports = Project;
+*/

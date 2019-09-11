@@ -1,4 +1,4 @@
- const model = require('../models/register')();
+/*const model = require('../models/register')();
  
  
  module.exports = function(app){
@@ -8,3 +8,4 @@
     });
 
 }
+*/
