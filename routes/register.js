@@ -1,6 +1,4 @@
-//const model = require('../models/register')();
- 
- 
+
  module.exports = function(app){
 
     app.get('/register', (req, res) => {
