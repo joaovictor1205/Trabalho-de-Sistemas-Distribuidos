@@ -13,7 +13,6 @@
     width: 200px;
     height: 200px;
 
-    background-color: #ddd;
     border-radius: 100%;
     object-fit: cover;
 
@@ -43,3 +42,18 @@ label{
 #buttons{
     margin-top: 63px;
 }
+
+body{
+    background-image: url('../img/background.jpg');
+    background-size: 100%;
+    background-repeat: no-repeat;
+}
+
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    text-align: left;
+}
+

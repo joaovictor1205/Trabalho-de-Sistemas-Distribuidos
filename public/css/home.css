@@ -52,3 +52,9 @@ label{
     text-align: left;
 
 }
+
+body{
+    background-image: url('../img/background.jpg');
+    background-size: 100%;
+    background-repeat: no-repeat;
+}
