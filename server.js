@@ -16,21 +16,26 @@ io.on('connection', socket => {
         messages.push(data);
         socket.broadcast.emit('receivedMessage', data);
 
-        var myJSON = JSON.stringify(data);
+        let myJSON = JSON.stringify(data);
         archive.readFile('./public/archive/messages.json', 'utf-8', function(err, data) {
             if (err) throw err
         
-            var arrayOfObjects = JSON.parse(data);
+            let arrayOfObjects = JSON.parse(data);
             arrayOfObjects.chat.push(myJSON);
-            var array = JSON.stringify(arrayOfObjects);
+            let array = JSON.stringify(arrayOfObjects);
 
             archive.writeFile('./public/archive/messages.json', array , 'utf-8', function(err) {
                 if (err) throw err
             });
-        
+
+            let arrayMessages = JSON.parse(array);
+            console.log(arrayMessages);
+
         });
 
     });
+
+
 
 });
 

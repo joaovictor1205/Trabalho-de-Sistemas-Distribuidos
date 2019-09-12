@@ -57,7 +57,7 @@
                                 <div class="form-group row">
                                     <label for="message" class="col-md-3">Message</label>
                                     <div class="col-sm-8">
-                                        <textarea name="message" rows="10" class="form-control" id="message" placeholder="Insert your message please" maxlength="1000" required></textarea>
+                                        <textarea name="message" rows="2" class="form-control" id="message" placeholder="Insert your message please" maxlength="1000" required></textarea>
                                         <div id="messages"></div>
                                     </div>
 
@@ -97,6 +97,7 @@
                 renderMessage(message);
             }
         });
+
 
         socket.on('receivedMessage', function(message){
             renderMessage(message);
