@@ -1,43 +1,58 @@
-const serverVariables = require('./server/configserver.js')
-const io = serverVariables.io;
+const serverVariables = require('./server/configserver.js');
 const server = serverVariables.server;
-const archive = require('fs')
+const WebSocket = require('ws');
+const archive = require('fs');
 
-let messages= [];
+const wss = new WebSocket.Server({port: 40510});
+const MESSAGE_TYPES = {
+  SEND_MESSAGE: 0,
+  SHOW_PREVIOUS_MESSAGES: 1,
+  RECEIVED_MESSAGE: 2
+};
+let messages = [];
 
-io.on('connection', socket => {
-    
-    console.log(`Conection with ${socket.id} socket`);
+wss.on('connection', sender => {
+  sender.send(JSON.stringify({
+    type: MESSAGE_TYPES.SHOW_PREVIOUS_MESSAGES,
+    data: messages
+  }));
 
-    socket.emit('showPreviousMessages', messages);
+  sender.on('message', message => {
+    message = JSON.parse(message);
 
-    socket.on('sendMessage', data => {
+    if (message.type === MESSAGE_TYPES.SEND_MESSAGE) {
+      messages.push(message.data);
+      console.log(`Received message => ${message.data}`);
 
-        messages.push(data);
-        socket.broadcast.emit('receivedMessage', data);
+      wss.broadcast({
+        type: MESSAGE_TYPES.RECEIVED_MESSAGE,
+        data: message.data
+      }, sender);
 
-        let myJSON = JSON.stringify(data);
-        archive.readFile('./public/archive/messages.json', 'utf-8', function(err, data) {
-            if (err) throw err
-        
-            let arrayOfObjects = JSON.parse(data);
-            arrayOfObjects.chat.push(myJSON);
-            let array = JSON.stringify(arrayOfObjects);
+      let myJSON = JSON.stringify(message.data);
+      archive.readFile('./public/archive/messages.json', 'utf-8', function (err, data) {
+        if (err) throw err
 
-            archive.writeFile('./public/archive/messages.json', array , 'utf-8', function(err) {
-                if (err) throw err
-            });
+        let arrayOfObjects = JSON.parse(data);
+        arrayOfObjects.chat.push(myJSON);
+        let array = JSON.stringify(arrayOfObjects);
 
-            let arrayMessages = JSON.parse(array);
-            console.log(arrayMessages);
-
+        archive.writeFile('./public/archive/messages.json', array, 'utf-8', function (err) {
+          if (err) throw err
         });
 
-    });
-
-
-
+        let arrayMessages = JSON.parse(array);
+        // console.log(arrayMessages);
+      });
+    }
+  });
 });
+
+wss.broadcast = function broadcast(data, sender=null) {
+  wss.clients.forEach(function each(client) {
+    if (client !== sender) client.send(JSON.stringify(data));
+  });
+};
 
 const PORT = 3000;
 const HOST = 'localhost';

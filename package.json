@@ -16,5 +16,12 @@
   "bugs": {
     "url": "https://github.com/joaovictor1205/Trabalho-de-Sistemas-Distribuidos/issues"
   },
-  "homepage": "https://github.com/joaovictor1205/Trabalho-de-Sistemas-Distribuidos#readme"
+  "homepage": "https://github.com/joaovictor1205/Trabalho-de-Sistemas-Distribuidos#readme",
+  "dependencies": {
+    "consign": "^0.1.6",
+    "ejs": "^2.7.1",
+    "express": "^4.17.1",
+    "io": "^1.0.0",
+    "ws": "^7.1.2"
+  }
 }
