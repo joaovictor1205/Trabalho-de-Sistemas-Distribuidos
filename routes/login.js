@@ -1,7 +1,5 @@
-module.exports = function(app){
-
-    app.get('/', (req, res) => {
-        res.render('./templates/login.html');
-    });
-
-}
+module.exports = function (app) {
+  app.get('/login', (req, res) => {
+    res.render('./templates/login');
+  });
+};

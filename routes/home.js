@@ -1,7 +1,5 @@
-module.exports = function(app){
-
-    app.get('/home', (req, res) => {
-        res.render('./templates/home.html');
+module.exports = function(app) {
+    app.get('/', (req, res) => {
+        res.render('./templates/home');
     });
-
-}
+};

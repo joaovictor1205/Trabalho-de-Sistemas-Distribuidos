@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/joaovictor1205/Trabalho-de-Sistemas-Distribuidos#readme",
   "dependencies": {
+    "bcrypt": "^3.0.6",
     "consign": "^0.1.6",
     "ejs": "^2.7.1",
     "express": "^4.17.1",

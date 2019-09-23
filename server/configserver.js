@@ -6,10 +6,10 @@ const app = express();
 const server = require('http').createServer(app)
 
 app.use(express.static(path.join(__dirname, '../public')));
+app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, '../public'));
-app.engine('html', require('ejs').renderFile);
-app.set('view engine', 'html')
 
-consign().include('./routes/').into(app);
+
+consign().include('./routes/').then('./controllers/').into(app);
 
 module.exports = { app, server }
