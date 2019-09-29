@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 
 const usersFile = 'archive/users.json';
+const matchesFile = 'archive/matches.json';
 
 module.exports.authenticate = function(server, wss, sender, message) {
   let token = message.data.token;
@@ -38,13 +39,36 @@ module.exports.authenticate = function(server, wss, sender, message) {
       }));
     }
 
+    if (userType === global.USER_TYPES.EMPLOYEE) {
+      return sender.send(JSON.stringify({
+        type: global.MESSAGE_TYPES.AUTHENTICATION,
+        data: {
+          status: true,
+          user: {
+            username,
+            userType
+          }
+        }
+      }));
+    }
+
+    let matches = [];
+    if (fs.existsSync(matchesFile)) {
+      let matchesData = fs.readFileSync(matchesFile, 'utf8');
+      let matchesObj = JSON.parse(matchesData);
+
+      let matchesAux = matchesObj.filter(obj => obj.recruiter === username);
+      matches = matches.concat(matchesAux);
+    }
+
     return sender.send(JSON.stringify({
       type: global.MESSAGE_TYPES.AUTHENTICATION,
       data: {
         status: true,
         user: {
           username,
-          userType
+          userType,
+          matches
         }
       }
     }));

@@ -5,9 +5,8 @@ const WebSocket = require('ws');
 
 const wss = new WebSocket.Server({port: 40510});
 
-let messages = [];
-
 const usersControllers = require('./controllers/users');
+const matchesControllers = require('./controllers/matches');
 const messagesControllers = require('./controllers/messages');
 const authenticationControllers = require('./controllers/authentication');
 
@@ -34,6 +33,22 @@ wss.on('connection', sender => {
 
       case global.MESSAGE_TYPES.SEND_MESSAGE:
         messagesControllers.sendMessage(server, wss, sender, message);
+        break;
+
+      case global.MESSAGE_TYPES.OFFER_JOB:
+        matchesControllers.offerJob(server, wss, sender, message);
+        break;
+
+      case global.MESSAGE_TYPES.GET_MATCHES:
+        matchesControllers.getMatches(server, wss, sender, message);
+        break;
+
+      case global.MESSAGE_TYPES.ACCEPT_MATCH:
+        matchesControllers.acceptMatch(server, wss, sender, message);
+        break;
+
+      case global.MESSAGE_TYPES.REJECT_MATCH:
+        matchesControllers.rejectMatch(server, wss, sender, message);
         break;
     }
   });
