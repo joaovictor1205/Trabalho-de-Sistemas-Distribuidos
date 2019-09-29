@@ -8,7 +8,7 @@
 
     • Introdução
 
-      O TinderIn é uma aplicação multiplataforma para encontro de Empresas e Desenvolvedores que desejam diminuir a formalidade na busca de vagas e novos funcionários.
+      O NerdRoom é uma aplicação multiplataforma para encontro de Empresas e Desenvolvedores que desejam diminuir a formalidade na busca de vagas e novos funcionários.
 
     • Funcionamento
 
@@ -21,10 +21,10 @@
 
     • Arquitetura do Software
 
-      • Aplicação (Socket)
+      • Aplicação (WebSocket)
           ◦ Comunicação TCP/IP
-      • Servidor
-      • Json
+      • Servidor (Express/Node.js)
+      • Json (Arquivo para armazenamento do histórico do chat e das informações de Registro)
       
     • Lista de Testes
 
@@ -58,11 +58,3 @@
               
         ◦ US006 – Chat
             ▪ Como um Funcionário/Recrutador desejo utilizar o chat para me comunicar com outra pessoas
-
-
-
-
-
-
-
-OBS: As informações contidas aqui não tem cunho comercial, a utilização da logomarca e nomes como Tinder e LinkedIn são meramente para fins estudantis da disciplina de Sistemas Distribuídos do curso de Ciência da Computação - UFU.
