@@ -5,28 +5,34 @@ const archive = require('fs');
 
 const wss = new WebSocket.Server({port: 40510});
 global.MESSAGE_TYPES = {
-  REGISTER_USER: 0,
-  LOGIN_USER: 1,
-  SEND_MESSAGE: 2,
-  SHOW_PREVIOUS_MESSAGES: 3,
-  RECEIVED_MESSAGE: 4
+  AUTHENTICATION: 0,
+  REGISTER_USER: 1,
+  LOGIN_USER: 2,
+  SEND_MESSAGE: 3,
+  SHOW_PREVIOUS_MESSAGES: 4,
+  RECEIVED_MESSAGE: 5
 };
 let messages = [];
 
 const usersControllers = require('./controllers/users');
 const messagesControllers = require('./controllers/messages');
+const authenticationControllers = require('./controllers/authentication');
 
 wss.on('connection', sender => {
   sender.on('message', message => {
     message = JSON.parse(message);
 
     switch (message.type) {
+      case global.MESSAGE_TYPES.AUTHENTICATION:
+        authenticationControllers.authenticate(server, wss, sender, message);
+        break;
+
       case global.MESSAGE_TYPES.REGISTER_USER:
         usersControllers.registerUser(server, wss, sender, message);
         break;
 
       case global.MESSAGE_TYPES.LOGIN_USER:
-        usersControllers.loginUser(wss, sender, message);
+        usersControllers.loginUser(server, wss, sender, message);
         break;
 
       case global.MESSAGE_TYPES.SEND_MESSAGE:
