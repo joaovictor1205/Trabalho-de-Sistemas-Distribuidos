@@ -2,12 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 
-const secretJWT = 'jkhgjkg345kuihfdf,nmn354435kjwmsdfsd';
 const usersFile = 'archive/users.json';
-const userTypes = {
-  EMPLOYEE: 0,
-  RECRUITER: 1
-};
 
 async function comparePassword(password, hash) {
   return await new Promise((resolve, reject) => {
@@ -62,8 +57,8 @@ module.exports.registerUser = async function(server, wss, sender, message) {
     }));
   }
 
-  let token = jwt.sign({username: user.username}, secretJWT, {
-    expiresIn: 60*60*24
+  let token = jwt.sign({username: user.username}, global.secretJWT, {
+    expiresIn: 60 * 60 * 24
   });
 
   sender.send(JSON.stringify({
@@ -107,8 +102,8 @@ module.exports.loginUser = async function(server, wss, sender, message) {
     }));
   }
 
-  let token = jwt.sign({username: user.username}, secretJWT, {
-    expiresIn: 30
+  let token = jwt.sign({username: user.username}, global.secretJWT, {
+    expiresIn: 60 * 60 * 24
   });
 
   sender.send(JSON.stringify({

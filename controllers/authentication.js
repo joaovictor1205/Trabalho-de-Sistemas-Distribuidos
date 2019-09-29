@@ -1,17 +1,12 @@
 const jwt = require('jsonwebtoken');
-const secretJWT = 'jkhgjkg345kuihfdf,nmn354435kjwmsdfsd';
 const fs = require('fs');
 
 const usersFile = 'archive/users.json';
-const userTypes = {
-  EMPLOYEE: 0,
-  RECRUITER: 1
-};
 
 module.exports.authenticate = function(server, wss, sender, message) {
   let token = message.data.token;
 
-  jwt.verify(token, secretJWT, async (err, decoded) => {
+  jwt.verify(token, global.secretJWT, async (err, decoded) => {
     if (err || !decoded) {
       return sender.send(JSON.stringify({
         type: global.MESSAGE_TYPES.AUTHENTICATION,

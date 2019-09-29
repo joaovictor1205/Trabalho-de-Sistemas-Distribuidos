@@ -1,17 +1,10 @@
+const globalVariables = require('./server/globalVariables');
 const serverVariables = require('./server/configserver.js');
 const server = serverVariables.server;
 const WebSocket = require('ws');
-const archive = require('fs');
 
 const wss = new WebSocket.Server({port: 40510});
-global.MESSAGE_TYPES = {
-  AUTHENTICATION: 0,
-  REGISTER_USER: 1,
-  LOGIN_USER: 2,
-  SEND_MESSAGE: 3,
-  SHOW_PREVIOUS_MESSAGES: 4,
-  RECEIVED_MESSAGE: 5
-};
+
 let messages = [];
 
 const usersControllers = require('./controllers/users');
@@ -35,51 +28,15 @@ wss.on('connection', sender => {
         usersControllers.loginUser(server, wss, sender, message);
         break;
 
+      case global.MESSAGE_TYPES.GET_MESSAGES:
+        messagesControllers.getMessages(server, wss, sender, message);
+        break;
+
       case global.MESSAGE_TYPES.SEND_MESSAGE:
-        break;
-
-      case global.MESSAGE_TYPES.RECEIVED_MESSAGE:
-        break;
-
-      case global.MESSAGE_TYPES.SHOW_PREVIOUS_MESSAGES:
+        messagesControllers.sendMessage(server, wss, sender, message);
         break;
     }
   });
-
-  /*sender.send(JSON.stringify({
-    type: MESSAGE_TYPES.SHOW_PREVIOUS_MESSAGES,
-    data: messages
-  }));
-
-  sender.on('message', message => {
-    message = JSON.parse(message);
-
-    if (message.type === MESSAGE_TYPES.SEND_MESSAGE) {
-      messages.push(message.data);
-      console.log(`Received message => ${message.data}`);
-
-      wss.broadcast({
-        type: MESSAGE_TYPES.RECEIVED_MESSAGE,
-        data: message.data
-      }, sender);
-
-      let myJSON = JSON.stringify(message.data);
-      archive.readFile('./public/archive/messages.json', 'utf-8', function (err, data) {
-        if (err) throw err
-
-        let arrayOfObjects = JSON.parse(data);
-        arrayOfObjects.chat.push(myJSON);
-        let array = JSON.stringify(arrayOfObjects);
-
-        archive.writeFile('./public/archive/messages.json', array, 'utf-8', function (err) {
-          if (err) throw err
-        });
-
-        let arrayMessages = JSON.parse(array);
-        // console.log(arrayMessages);
-      });
-    }
-  });*/
 });
 
 wss.broadcast = function broadcast(data, sender = null) {
