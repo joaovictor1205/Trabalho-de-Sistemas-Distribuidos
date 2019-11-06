@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+enum USER_TYPE {
+    NOT_SPECIFIED = 0;
+    EMPLOYEE = 1;
+    RECRUITER = 2;
+}
+
+message User {
+    int32 id = 1;
+    string username = 2;
+    USER_TYPE user_type = 3;
+    string email = 4;
+    string password = 5;
+}
+
+message Message {
+    User user = 1;
+    string message = 2;
+}
+
+message Match {
+    User recruiter = 1;
+    User employee = 2;
+    bool recruiter_match = 3;
+    bool employee_match = 4;
+}
+
+message AuthRequest {
+    string token = 1;
+}
+
+service API {
+    rpc Authenticate(AuthRequest) returns (User) {}
+    rpc RegisterUser(User) returns (User) {}
+    rpc LoginUser(AuthRequest) returns (User) {}
+    rpc GetMessages(User) returns (stream Message) {}
+    rpc SendMessage(Message) returns (Message) {}
+    rpc OfferJob(Match) returns (Match) {}
+    rpc GetMatches(User) returns (stream Match) {}
+    rpc AcceptMatch(Match) returns (Match) {}
+    rpc RejectMatch(Match) returns (Match) {}
+}

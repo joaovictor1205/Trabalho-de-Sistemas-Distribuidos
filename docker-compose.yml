@@ -1,0 +1,29 @@
+version: "3.1"
+
+services:
+  backend:
+    container_name: nerd_room_backend
+    build:
+      context: ./backend
+    command: ["python", "server.py"]
+    environment:
+      - SECRET=knkj5n34jk5nmndfkn4lk35klnadlkfnal4
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "50051:50051"
+    volumes:
+      - db_data:/code/archive
+  frontend:
+    container_name: nerd_room_frontend
+    build:
+      context: ./frontend
+    ports:
+      - "127.0.0.1:5000:5000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["python", "run.py"]
+    depends_on:
+      - backend
+
+volumes:
+  db_data:

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <title> Nerd Room </title>
+  <link rel="shortcut icon" href="{{ url_for('static', filename='img/gamepad.png') }}">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css"
+        integrity="sha256-46qynGAkLSFpVbEBog43gvNhfrOj+BmwXdxFgVK/Kvc=" crossorigin="anonymous"/>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  {% block css %}
+  {% endblock css %}
+</head>
+<body>
+
+<div class="container my-container">
+  <div class="row my-row">
+    <div class="col-md-4 my-col">
+      <div class="card mb-3" style="max-width: 40rem;">
+        <div class="card-header"><img src="{{ url_for('static', filename='img/gamepad.png') }}" id="foto" alt="logo"></div>
+
+        <div class="card-body">
+          <h2 class="card-title">Nerd Room</h2>
+          {% block buttons %}
+          {% endblock buttons %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8 my-col">
+      {% block content %}
+      {% endblock content %}
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a
+    href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+
+{% block js %}
+{% endblock js %}
+</body>
+</html>
