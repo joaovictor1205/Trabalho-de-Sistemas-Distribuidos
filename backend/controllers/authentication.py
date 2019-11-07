@@ -37,7 +37,6 @@ def authenticate(request, context):
                 'employee_email': match['employee_email'],
                 'recruiter_match': match['recruiter_match'],
                 'employee_match': match['employee_match']
-            } for match in matches if match.recruiter == username]
-    print(matches)
+            } for match in matches if match['recruiter'] == username]
 
     return False, {'user': user, 'matches': matches}

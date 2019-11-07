@@ -69,6 +69,7 @@ def post_login():
     try:
         auth_response = stub.LoginUser(pb_user)
     except RpcError as e:
+        print(e)
         return render_template('login.html', error=True)
 
     resp = make_response(redirect('/chat'))

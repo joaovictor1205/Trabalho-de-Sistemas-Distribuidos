@@ -1,0 +1,163 @@
+{% extends "base.html" -%}
+
+{% block buttons %}
+  <a href="/chat">
+    <button class="btn btn-outline-dark text-center">Chat</button>
+  </a>
+  <button class="btn btn-outline-dark text-center logout-btn">Logout</button>
+{% endblock buttons %}
+
+{% block content %}
+  <div class="card mb-3" style="max-width: 40rem;">
+    <div class="card-header">Matches</div>
+
+    <div>
+      <ul class="list-group matches-list">
+
+      </ul>
+    </div>
+  </div>
+{% endblock content %}
+
+{% block js %}
+  <script type="text/javascript">
+    function getCookie(cname) {
+      let name = cname + "=";
+      let ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    function deleteCookie(name) {
+      document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;';
+    }
+
+    function createEmployeeMatch(match) {
+      let matchLi = '';
+
+      if (match.employee_match === -1) {
+        matchLi +=
+          '<li class="list-group-item">' +
+          '<span class="mr-4">' + match.recruiter + '</span>' +
+          '<button type="button" class="btn btn-outline-success btn-sm accept-match-btn">Aceitar</button>' +
+          '<button type="button" class="btn btn-outline-danger btn-sm refuse-match-btn">Recusar</button>' +
+          '</li>'
+      } else if (match.employee_match === 0) {
+        matchLi +=
+          '<li class="list-group-item">' +
+          '<span class="mr-4">' + match.recruiter + '</span>' +
+          '<button type="button" class="btn btn-outline-danger btn-sm" disabled>Recusado</button>' +
+          '</li>';
+      } else {
+        matchLi +=
+          '<li class="list-group-item">' +
+          '<span class="mr-4">' + match.recruiter + '</span>' +
+          '<button type="button" class="btn btn-outline-success btn-sm" disabled>Aceito</button>' +
+          '<button type="button" class="btn btn-outline-primary btn-sm contact-match-btn" disabled>Aguarde! Em breve voce sera contactado</button>' +
+          '</li>'
+      }
+
+      return matchLi;
+    }
+
+    function createRecruiterMatch(match) {
+      let matchLi = '';
+
+      if (match.employee_match === -1) {
+        matchLi +=
+          '<li class="list-group-item">' +
+          '<span class="mr-4">' + match.employee + '</span>' +
+          '<button type="button" class="btn btn-outline-warning btn-sm" disabled>Esperando Aceitaçao</button>' +
+          '</li>';
+      } else if (match.employee_match === 0) {
+        matchLi +=
+          '<li class="list-group-item">' +
+          '<span class="mr-4">' + match.employee + '</span>' +
+          '<button type="button" class="btn btn-outline-danger btn-sm" disabled>Recusado</button>' +
+          '</li>';
+      } else {
+        matchLi +=
+          '<li class="list-group-item">' +
+          '<span class="mr-4">' + match.employee + '</span>' +
+          '<button type="button" class="btn btn-outline-success btn-sm" disabled>Aceito</button>' +
+          '<a href="mailto:' + match.employeeEmail + '">' +
+          '<button type="button" class="btn btn-outline-primary btn-sm">Contatar</button>' +
+          '</a>' +
+          '</li>'
+      }
+
+      return matchLi;
+    }
+
+    function parseMatches(matches) {
+      if (matches.length === 0) {
+        let noMatch = '<li class="list-group-item">Sem Matches</li>';
+        return $('.matches-list').append(noMatch);
+      }
+
+      if (loggedUser.user_type === USER_TYPES.RECRUITER) {
+        for (let match of matches) {
+          $('.matches-list').append(createRecruiterMatch(match));
+        }
+      } else if (loggedUser.user_type === USER_TYPES.EMPLOYEE) {
+        for (let match of matches) {
+          $('.matches-list').append(createEmployeeMatch(match));
+        }
+      }
+    }
+
+    let token = getCookie('token');
+    let loggedUser = {{user|safe}};
+    let matches = {{matches|safe}};
+
+    const USER_TYPES = {
+      EMPLOYEE: 1,
+      RECRUITER: 2
+    };
+
+    console.log(matches);
+
+    parseMatches(matches);
+
+    $('.logout-btn').on('click', () => {
+      deleteCookie('token');
+      window.location.href = '/';
+    });
+
+    $('.matches-list').on('click', '.accept-match-btn', function() {
+      let recruiter = $(this).siblings('span').html();
+
+      fetch('/accept_match', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({recruiter, employee: loggedUser.username, token: token})
+      }).then(() => {
+        location.reload();
+      });
+    });
+
+    $('.matches-list').on('click', '.refuse-match-btn', function() {
+      let recruiter = $(this).siblings('span').html();
+
+      fetch('/reject_match', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({recruiter, employee: loggedUser.username, token: token})
+      }).then(() => {
+        location.reload();
+      });
+    });
+  </script>
+{% endblock js %}

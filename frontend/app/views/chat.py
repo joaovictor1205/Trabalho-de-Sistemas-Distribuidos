@@ -18,6 +18,7 @@ def chat():
     try:
         auth_response = stub.Authenticate(pb_auth_request)
     except RpcError as e:
+        print(e)
         return redirect('/')
 
     user = {
@@ -26,12 +27,12 @@ def chat():
         'user_type': auth_response.user.user_type
     }
 
-    # matches = [{
-    #     'recruiter': match.recruiter.username,
-    #     'employee': match.employee.username,
-    #     'recruiter_match': match.recruiter_match,
-    #     'employee_match': match.employee_match
-    # } for match in auth_response.matches]
+    matches = [{
+        'recruiter': match.recruiter.username,
+        'employee': match.employee.username,
+        'recruiter_match': match.recruiter_match,
+        'employee_match': match.employee_match
+    } for match in auth_response.matches]
 
     pb_user = API_pb2.User(username=auth_response.user.username, user_type=auth_response.user.user_type)
 
@@ -46,6 +47,7 @@ def chat():
                 }
             })
     except RpcError as e:
+        print(e)
         return redirect('/')
 
     return render_template('chat.html', user=user, matches=matches, old_messages=old_messages)

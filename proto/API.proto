@@ -23,8 +23,8 @@ message Message {
 message Match {
     User recruiter = 1;
     User employee = 2;
-    bool recruiter_match = 3;
-    bool employee_match = 4;
+    int32 recruiter_match = 3;
+    int32 employee_match = 4;
 }
 
 message AuthRequest {

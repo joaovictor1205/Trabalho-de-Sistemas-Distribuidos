@@ -18,6 +18,7 @@ def send_message():
     try:
         message = stub.SendMessage(pb_message)
     except RpcError as e:
+        print(e)
         return {'error': True}
 
     return jsonify({
