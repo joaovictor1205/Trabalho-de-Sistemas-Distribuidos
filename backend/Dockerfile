@@ -14,4 +14,4 @@ ENV PYTHONUNBUFFERED 1
 RUN python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. ./proto/API.proto
 
 EXPOSE 50051
-CMD ["python", "server.py"]
+CMD ["python", "-u", "server.py"]
