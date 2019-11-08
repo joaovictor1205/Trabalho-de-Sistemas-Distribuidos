@@ -36,7 +36,7 @@ class ConsistentHashing:
 
     def remove_node(self, name):
         try:
-            node_conf = self.nodes.pop(name) #procura o node no anel pelo nome
+            node_conf = self.nodes.pop(name)
         except Exception:
             raise KeyError('Node: \'{}\' doesnt exist, choose other node: {}'.format(
                 name, self.nodes.keys()))
@@ -46,5 +46,8 @@ class ConsistentHashing:
                 del self.ring[self._hash('%s-%s' % (name, w))]
             self.keys = sorted(self.ring.keys())
 
-    def search_node(self):
-        pass
+    def search_node(self, name):
+        try:
+            node_conf = self.nodes.pop(name)
+        except Exception:
+            raise KeyError('Node: \'{}\' doesnt exist'.format(name))
