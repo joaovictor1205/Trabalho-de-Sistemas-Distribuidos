@@ -34,8 +34,17 @@ class ConsistentHashing:
     def add_node(self):
         pass
 
-    def remove_node(self):
-        pass
+    def remove_node(self, name):
+        try:
+            node_conf = self.nodes.pop(name) #procura o node no anel pelo nome
+        except Exception:
+            raise KeyError('Node: \'{}\' doesnt exist, choose other node: {}'.format(
+                name, self.nodes.keys()))
+        else:
+            self.replications.pop(name)
+            for w in range(self.replications):
+                del self.ring[self._hash('%s-%s' % (name, w))]
+            self.keys = sorted(self.ring.keys())
 
     def search_node(self):
         pass
