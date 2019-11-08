@@ -8,6 +8,9 @@ RUN mkdir /code
 WORKDIR /code
 ADD . /code
 
+ENV PYTHONUNBUFFERED 1
+
 RUN python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. ./app/proto/API.proto
 
 EXPOSE 5000
+CMD ["python", "run.py"]

@@ -1,6 +1,7 @@
 from concurrent import futures
 import grpc
 import time
+import os
 
 from proto import API_pb2
 from proto import API_pb2_grpc
@@ -9,6 +10,8 @@ from controllers import authentication
 from controllers import matches
 from controllers import messages
 from controllers import users
+
+ID_SERVER = os.getenv('ID_SERVER')
 
 
 class APIServicer(API_pb2_grpc.APIServicer):
@@ -137,7 +140,7 @@ server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 # Add the class into server
 API_pb2_grpc.add_APIServicer_to_server(APIServicer(), server)
 
-print('Starting server. Listening on port 50051.')
+print(f'Starting server: {ID_SERVER}. Listening on port 50051.')
 server.add_insecure_port('[::]:50051')
 server.start()
 
