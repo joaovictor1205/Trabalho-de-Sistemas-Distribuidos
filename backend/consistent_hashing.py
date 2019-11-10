@@ -34,9 +34,9 @@ class ConsistentHashing:
     def add_node(self):
         pass
 
-    def remove_node(self, name):
+    def remove_node(self, server, name):
         try:
-            node_conf = self.nodes.pop(name)
+            self.nodes[server['id']] = server['port']
         except Exception:
             raise KeyError('Node: \'{}\' doesnt exist, choose other node: {}'.format(
                 name, self.nodes.keys()))
@@ -48,6 +48,6 @@ class ConsistentHashing:
 
     def search_node(self, name):
         try:
-            node_conf = self.nodes.pop(name)
+            name == self.replications.pop(name)
         except Exception:
             raise KeyError('Node: \'{}\' doesnt exist'.format(name))
