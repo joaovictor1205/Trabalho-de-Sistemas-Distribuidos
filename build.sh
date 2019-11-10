@@ -29,10 +29,10 @@ echo "Deleting Containers"
 docker container rm -f nerd_room_frontend
 docker container ls -a | awk '{ print $1,$2 }' | grep nerd_room_backend_img | awk '{ print $1 }' | xargs -I {} docker container rm -f {}
 
-echo "Deleting Volumes"
-docker volume ls | awk '{ print $1,$2 }' | grep nerd_room_volume | awk '{ print $2 }' | xargs -I {} docker volume rm -f {}
-
 if [ "$BUILD" == "hard" ] ; then
+    echo "Deleting Volumes"
+    docker volume ls | awk '{ print $1,$2 }' | grep nerd_room_volume | awk '{ print $2 }' | xargs -I {} docker volume rm -f {}
+
     echo "Building Images"
     docker image build -t nerd_room_backend_img backend/
     docker image build -t nerd_room_frontend_img frontend/
@@ -54,18 +54,20 @@ do
     OUT_PORT=$(($INITIAL_PORT + $i))
     echo $CONTAINER_NAME
 
-    docker volume create ${VOLUME_NAME}
+    if [ "$BUILD" == "hard" ] ; then
+        docker volume create ${VOLUME_NAME}
+    fi
 
     if [ "$MODE" == "dae" ] ; then
         docker run -i -p 127.0.0.1:$OUT_PORT:50051 \
             -v ${VOLUME_NAME}:/code/archive \
-            --env ID_SERVER=${i} --env NUM_SERVERS=${SERVERS} --env INITIAL_PORT=${INITIAL_PORT} \
+            --env ID_SERVER=${i} --env NUM_SERVERS=${SERVERS} --env PORT=${INITIAL_PORT} \
             --name "${CONTAINER_NAME}" --network nerd_room_net \
             nerd_room_backend_img &
     else
         docker run -d -p 127.0.0.1:$OUT_PORT:50051 \
             -v ${VOLUME_NAME}:/code/archive \
-            --env ID_SERVER=${i} --env NUM_SERVERS=${SERVERS} --env INITIAL_PORT=${INITIAL_PORT} \
+            --env ID_SERVER=${i} --env NUM_SERVERS=${SERVERS} --env PORT=${INITIAL_PORT} \
             --name "${CONTAINER_NAME}" --network nerd_room_net \
             nerd_room_backend_img
     fi
@@ -74,7 +76,7 @@ done
 sleep 5
 
 if [ "$MODE" == "dae" ] ; then
-    docker run -d -p 5000:5000 --name nerd_room_frontend --network nerd_room_net nerd_room_frontend_img
+    docker run -d -p 5000:5000 --name nerd_room_frontend --env ROOT_API=nerd_room_backend0:50051 --network nerd_room_net nerd_room_frontend_img
 else
-    docker run -i -p 5000:5000 --name nerd_room_frontend --network nerd_room_net nerd_room_frontend_img &
+    docker run -i -p 5000:5000 --name nerd_room_frontend --env ROOT_API=nerd_room_backend0:50051 --network nerd_room_net nerd_room_frontend_img &
 fi

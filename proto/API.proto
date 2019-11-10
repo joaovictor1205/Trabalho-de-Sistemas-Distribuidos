@@ -29,6 +29,7 @@ message Match {
 
 message AuthRequest {
     string token = 1;
+    string username = 2;
 }
 
 message AuthResponse {
@@ -36,14 +37,33 @@ message AuthResponse {
     repeated Match matches = 2;
 }
 
+message Node {
+    string id = 1;
+    int32 server_id = 2;
+}
+
+message RequestFindSuccessor {
+    string key = 1;
+}
+
+message ReplicatedMessage {
+    Message message = 1;
+    repeated Node nodes = 2;
+}
+
+message Empty {}
+
 service API {
     rpc Authenticate(AuthRequest) returns (AuthResponse) {}
     rpc RegisterUser(User) returns (AuthResponse) {}
     rpc LoginUser(User) returns (AuthResponse) {}
     rpc GetMessages(User) returns (stream Message) {}
     rpc SendMessage(Message) returns (Message) {}
+    rpc ReplicateMessage(ReplicatedMessage) returns (Empty) {}
     rpc OfferJob(Match) returns (Match) {}
     rpc GetMatches(User) returns (stream Match) {}
     rpc AcceptMatch(Match) returns (Match) {}
     rpc RejectMatch(Match) returns (Match) {}
+    rpc FloodNode(Node) returns (Empty) {}
+    rpc FindSuccessor(RequestFindSuccessor) returns (Node) {}
 }

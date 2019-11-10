@@ -45,6 +45,7 @@ def post_register():
 
     resp = make_response(redirect('/chat'))
     resp.set_cookie('token', auth_response.user.token)
+    resp.set_cookie('username', auth_response.user.username)
     return resp
 
 
@@ -74,4 +75,5 @@ def post_login():
 
     resp = make_response(redirect('/chat'))
     resp.set_cookie('token', auth_response.user.token)
+    resp.set_cookie('username', auth_response.user.username)
     return resp

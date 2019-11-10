@@ -11,9 +11,11 @@ def chat():
     token = request.cookies.get('token')
     if not token:
         return redirect('/')
+    username = request.cookies.get('username')
 
     pb_auth_request = API_pb2.AuthRequest()
     pb_auth_request.token = token
+    pb_auth_request.username = username
 
     try:
         auth_response = stub.Authenticate(pb_auth_request)
@@ -46,6 +48,7 @@ def chat():
                     'user_type': message.user.user_type
                 }
             })
+            print(message)
     except RpcError as e:
         print(e)
         return redirect('/')
