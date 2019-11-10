@@ -36,7 +36,7 @@ class ConsistentHashing:
 
     def remove_node(self, server, name):
         try:
-            self.nodes[server['id']] = server['port']
+            name == self.replications.pop(name)
         except Exception:
             raise KeyError('Node: \'{}\' doesnt exist, choose other node: {}'.format(
                 name, self.nodes.keys()))
