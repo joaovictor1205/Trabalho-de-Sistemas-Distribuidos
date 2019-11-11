@@ -1,67 +1,44 @@
 from passlib.hash import sha256_crypt
 import os.path
-import json
+import uuid
 import jwt
 
-USERS_PATH = 'archive/users.json'
 SECRET = os.getenv('SECRET')
 
 
-def register_user(request, context):
+def register_user(LSMT, request, context):
     user = {
+        'id': str(uuid.uuid4()),
         'username': request.username,
         'email': request.email,
         'user_type': request.user_type,
-        'password': sha256_crypt.encrypt(request.password)
+        'password': sha256_crypt.encrypt(request.password),
+        'type': 'users'
     }
 
-    if os.path.exists(USERS_PATH):
-        with open(USERS_PATH, 'r+') as json_file:
-            users = json.load(json_file)
+    aux_user = LSMT.search({'type': 'users', 'username': user['username']})
 
-            for aux_user in users:
-                if aux_user['username'] == user['username']:
-                    return True, {'msg': 'User already exists'}, None
+    if aux_user:
+        return True, {'msg': 'User already exists'}, None
 
-            users.append(user)
-            json_file.seek(0)
-            json.dump(users, json_file)
-            json_file.truncate()
-
-            token = jwt.encode({'username': user['username']}, SECRET, algorithm='HS256')
-            return False, {'user': user, 'token': token}
-    else:
-        with open(USERS_PATH, 'w+') as json_file:
-            users = [user]
-            json.dump(users, json_file)
-
-            token = jwt.encode({'username': user['username']}, SECRET, algorithm='HS256')
-            return False, {'user': user, 'token': token}
+    LSMT.create(user['id'], user)
+    token = jwt.encode({'username': user['username']}, SECRET, algorithm='HS256')
+    return False, {'user': user, 'token': token}
 
 
-def login_user(request, context):
-    obj_user = {
+def login_user(LSMT, request, context):
+    user = {
         'username': request.username,
         'password': request.password
     }
 
-    if not os.path.exists(USERS_PATH):
+    aux_user = LSMT.search({'type': 'users', 'username': user['username']})
+
+    if not aux_user:
         return True, {'msg': 'User does not exist'}
 
-    with open(USERS_PATH, 'r+') as json_file:
-        users = json.load(json_file)
+    if not sha256_crypt.verify(user['password'], aux_user['password']):
+        return True, {'msg': 'User Invalid'}
 
-        user = None
-        for aux_user in users:
-            if aux_user['username'] == obj_user['username']:
-                user = aux_user
-                break
-
-        if user is None:
-            return True, {'msg': 'User does not exist'}
-
-        if not sha256_crypt.verify(obj_user['password'], user['password']):
-            return True, {'msg': 'User Invalid'}
-
-        token = jwt.encode({'username': user['username']}, SECRET, algorithm='HS256')
-        return False, {'user': user, 'token': token}
+    token = jwt.encode({'username': aux_user['username']}, SECRET, algorithm='HS256')
+    return False, {'user': aux_user, 'token': token}

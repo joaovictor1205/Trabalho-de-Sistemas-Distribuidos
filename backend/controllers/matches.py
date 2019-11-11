@@ -1,4 +1,5 @@
 from proto import API_pb2
+import uuid
 import json
 import jwt
 import os
@@ -8,7 +9,7 @@ MATCHES_PATH = 'archive/matches.json'
 SECRET = os.getenv('SECRET')
 
 
-def offer_job(request, context):
+def offer_job(LSMT, request, context):
     token = request.recruiter.token
     decoded = jwt.decode(token, SECRET, algorithms=['HS256'])
     username = decoded['username']
@@ -17,67 +18,36 @@ def offer_job(request, context):
         return True, {'msg': 'Wrong Credentials'}
 
     employee_email = ''
-    if os.path.exists(USERS_PATH):
-        with open(USERS_PATH, 'r+') as json_file:
-            users = json.load(json_file)
-            for aux_user in users:
-                if aux_user['username'] == request.employee.username:
-                    employee_email = aux_user['email']
+    employee = LSMT.search({'type': 'users', 'username': request.employee.username})
+    if employee:
+        employee_email = employee['email']
 
     match = {
+        'id': str(uuid.uuid4()),
         'recruiter': request.recruiter.username,
         'employee': request.employee.username,
         'employee_email': employee_email,
         'recruiter_match': 1,
         'employee_match': -1,
+        'type': 'matches'
     }
 
-    if os.path.exists(MATCHES_PATH):
-        with open(MATCHES_PATH, 'r+') as json_file:
-            matches = json.load(json_file)
-            matches.append(match)
-
-            json_file.seek(0)
-            json.dump(matches, json_file)
-            json_file.truncate()
-
-            return False, {'match': match}
-    else:
-        with open(MATCHES_PATH, 'w+') as json_file:
-            matches = [match]
-            json.dump(matches, json_file)
-
-            return False, {'match': match}
+    LSMT.create(match['id'], match)
+    return False, {'match': match}
 
 
-def get_matches(request, context):
+def get_matches(LSMT, request, context):
     matches = []
 
-    if os.path.exists(MATCHES_PATH):
-        with open(MATCHES_PATH, 'r+') as json_file:
-            matches = json.load(json_file)
-
-            if request.user_type == API_pb2.USER_TYPE.EMPLOYEE:
-                matches = [{
-                    'recruiter': match['recruiter'],
-                    'employee': match['employee'],
-                    'employee_email': match['employee_email'],
-                    'recruiter_match': match['recruiter_match'],
-                    'employee_match': match['employee_match']
-                } for match in matches if match['employee'] == request.username]
-            elif request.user_type == API_pb2.USER_TYPE.RECRUITER:
-                matches = [{
-                    'recruiter': match['recruiter'],
-                    'employee': match['employee'],
-                    'employee_email': match['employee_email'],
-                    'recruiter_match': match['recruiter_match'],
-                    'employee_match': match['employee_match']
-                } for match in matches if match['recruiter'] == request.username]
+    if request.user_type == API_pb2.USER_TYPE.EMPLOYEE:
+        matches = LSMT.search_multiple({'type': 'matches', 'employee': request.username})
+    elif request.user_type == API_pb2.USER_TYPE.RECRUITER:
+        matches = LSMT.search_multiple({'type': 'matches', 'recruiter': request.username})
 
     return False, {'matches': matches}
 
 
-def accept_match(request, context):
+def accept_match(LSMT, request, context):
     token = request.employee.token
     decoded = jwt.decode(token, SECRET, algorithms=['HS256'])
     username = decoded['username']
@@ -85,30 +55,19 @@ def accept_match(request, context):
     if username != request.employee.username:
         return True, {'msg': 'Wrong Credentials'}
 
-    if os.path.exists(MATCHES_PATH):
-        with open(MATCHES_PATH, 'r+') as json_file:
-            matches = json.load(json_file)
+    match = LSMT.search({
+        'type': 'matches',
+        'employee': request.employee.username,
+        'recruiter': request.recruiter.username
+    })
 
-            for i in range(len(matches)):
-                if matches[i]['employee'] == request.employee.username and \
-                   matches[i]['recruiter'] == request.recruiter.username:
-                    matches[i]['employee_match'] = 1
+    match['employee_match'] = 1
+    LSMT.create(match['id'], match)
 
-                    json_file.seek(0)
-                    json.dump(matches, json_file)
-                    json_file.truncate()
-
-                    return False, {
-                        'recruiter': matches[i]['recruiter'],
-                        'employee': matches[i]['employee'],
-                    }
-
-            return True, {'msg': 'Match Does Not Exist'}
-    else:
-        return True, {'msg': 'Match Does Not Exist'}
+    return False, {'match': match}
 
 
-def reject_match(request, context):
+def reject_match(LSMT, request, context):
     token = request.employee.token
     decoded = jwt.decode(token, SECRET, algorithms=['HS256'])
     username = decoded['username']
@@ -116,24 +75,13 @@ def reject_match(request, context):
     if username != request.employee.username:
         return True, {'msg': 'Wrong Credentials'}
 
-    if os.path.exists(MATCHES_PATH):
-        with open(MATCHES_PATH, 'r+') as json_file:
-            matches = json.load(json_file)
+    match = LSMT.search({
+        'type': 'matches',
+        'employee': request.employee.username,
+        'recruiter': request.recruiter.username
+    })
 
-            for i in range(len(matches)):
-                if matches[i]['employee'] == request.employee.username and \
-                        matches[i]['recruiter'] == request.recruiter.username:
-                    matches[i]['employee_match'] = 0
+    match['employee_match'] = 0
+    LSMT.create(match['id'], match)
 
-                    json_file.seek(0)
-                    json.dump(matches, json_file)
-                    json_file.truncate()
-
-                    return False, {
-                        'recruiter': matches[i]['recruiter'],
-                        'employee': matches[i]['employee'],
-                    }
-
-            return True, {'msg': 'Match Does Not Exist'}
-    else:
-        return True, {'msg': 'Match Does Not Exist'}
+    return False, {'match': match}

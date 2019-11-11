@@ -47,6 +47,7 @@
         matchLi +=
           '<li class="list-group-item">' +
           '<span class="mr-4">' + match.recruiter + '</span>' +
+          '<input type="hidden" class="matchId" value="' + match.id + '">' +
           '<button type="button" class="btn btn-outline-success btn-sm accept-match-btn">Aceitar</button>' +
           '<button type="button" class="btn btn-outline-danger btn-sm refuse-match-btn">Recusar</button>' +
           '</li>'
@@ -134,13 +135,14 @@
 
     $('.matches-list').on('click', '.accept-match-btn', function() {
       let recruiter = $(this).siblings('span').html();
+      let matchId = $(this).siblings('.matchId').val();
 
       fetch('/accept_match', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({recruiter, employee: loggedUser.username, token: token})
+        body: JSON.stringify({id: matchId, recruiter, employee: loggedUser.username, token: token})
       }).then(() => {
         location.reload();
       });
@@ -148,13 +150,14 @@
 
     $('.matches-list').on('click', '.refuse-match-btn', function() {
       let recruiter = $(this).siblings('span').html();
+      let matchId = $(this).siblings('.matchId').val();
 
       fetch('/reject_match', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({recruiter, employee: loggedUser.username, token: token})
+        body: JSON.stringify({id: matchId, recruiter, employee: loggedUser.username, token: token})
       }).then(() => {
         location.reload();
       });

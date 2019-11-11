@@ -78,7 +78,7 @@
           '<div class="received_msg">' +
           '<div class="received_withd_msg">' +
           '<p class="px-0 pb-0">' +
-          '<span class="font-weight-bold">' + username + '</span>';
+          '<span class="font-weight-bold username">' + username + '</span>';
 
         if (matches.find(obj => obj.employee === username))
           incomingMessage += '<button type="button" class="btn btn-sm btn-outline-success text-center ml-3 offer-job-btn" disabled>Vaga Oferecida</button>';
@@ -147,10 +147,19 @@
     $('.msg_history').on('click', '.offer-job-btn', function () {
       let employeeUsername = $(this).prev().html();
 
-      $(this).html('Vaga Oferecida');
-      $(this).removeClass('btn-outline-dark');
-      $(this).addClass('btn-outline-success');
-      $(this).attr('disabled', true);
+      let msgs = $('.incoming_msg');
+      for (let msg of msgs) {
+        let username = $(msg).find('.username')[0];
+        username = $(username).html();
+
+        if (username === employeeUsername) {
+          let btn = $(msg).find('.offer-job-btn')[0];
+          $(btn).html('Vaga Oferecida');
+          $(btn).removeClass('btn-outline-dark');
+          $(btn).addClass('btn-outline-success');
+          $(btn).attr('disabled', true);
+        }
+      }
 
       fetch('/offer_job', {
         method: 'POST',
@@ -162,4 +171,3 @@
     });
   </script>
 {% endblock js %}
-<!-- TODO PEGAR MESSAGES A CADA 5 MINUTOS -->

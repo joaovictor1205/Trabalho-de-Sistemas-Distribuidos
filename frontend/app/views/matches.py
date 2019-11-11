@@ -33,8 +33,8 @@ def matches():
     try:
         matches = []
         for match in stub.GetMatches(pb_user):
-            print()
             matches.append({
+                'id': match.id,
                 'recruiter': match.recruiter.username,
                 'employee': match.employee.username,
                 'employee_email': match.employee.email,
@@ -65,6 +65,7 @@ def offer_job():
         return {'error': True}
 
     return jsonify({
+        'id': match.id,
         'recruiter': match.recruiter.username,
         'employee': match.employee.username,
     })
@@ -76,6 +77,7 @@ def accept_match():
 
     data = request.json
     pb_match = API_pb2.Match()
+    pb_match.id = data['id']
     pb_match.recruiter.username = data['recruiter']
     pb_match.employee.token = data['token']
     pb_match.employee.username = data['employee']
@@ -98,6 +100,7 @@ def reject_match():
 
     data = request.json
     pb_match = API_pb2.Match()
+    pb_match.id = data['id']
     pb_match.recruiter.username = data['recruiter']
     pb_match.employee.token = data['token']
     pb_match.employee.username = data['employee']

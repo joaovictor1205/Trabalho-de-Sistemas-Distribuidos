@@ -24,12 +24,14 @@ def chat():
         return redirect('/')
 
     user = {
+        'id': auth_response.user.id,
         'username': auth_response.user.username,
         'email': auth_response.user.email,
         'user_type': auth_response.user.user_type
     }
 
     matches = [{
+        'id': match.id,
         'recruiter': match.recruiter.username,
         'employee': match.employee.username,
         'recruiter_match': match.recruiter_match,
@@ -48,7 +50,6 @@ def chat():
                     'user_type': message.user.user_type
                 }
             })
-            print(message)
     except RpcError as e:
         print(e)
         return redirect('/')

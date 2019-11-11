@@ -47,19 +47,21 @@ class APIServicer(API_pb2_grpc.APIServicer):
                 return API_pb2.AuthResponse()
         print(f'Authenticate - Server {ID_SERVER} executing the action')
 
-        error, data = authentication.authenticate(request, context)
+        error, data = authentication.authenticate(self.LSMT, request, context)
         if error:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details(data['msg'])
             return API_pb2.AuthResponse()
         else:
             pb_auth_response = API_pb2.AuthResponse()
+            pb_auth_response.user.id = data['user']['id']
             pb_auth_response.user.username = data['user']['username']
             pb_auth_response.user.user_type = data['user']['user_type']
             pb_auth_response.user.email = data['user']['email']
 
             for match in data['matches']:
                 pb_match = pb_auth_response.matches.add()
+                pb_match.id = match['id']
                 pb_match.recruiter.username = match['recruiter']
                 pb_match.employee.username = match['employee']
                 pb_match.employee.email = match['employee_email']
@@ -89,13 +91,14 @@ class APIServicer(API_pb2_grpc.APIServicer):
                 return API_pb2.AuthResponse()
         print(f'RegisterUser - Server {ID_SERVER} executing the action')
 
-        error, data = users.register_user(request, context)
+        error, data = users.register_user(self.LSMT, request, context)
         if error:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details(data['msg'])
             return API_pb2.AuthResponse()
         else:
             pb_auth_response = API_pb2.AuthResponse()
+            pb_auth_response.user.id = data['user']['id']
             pb_auth_response.user.username = data['user']['username']
             pb_auth_response.user.user_type = data['user']['user_type']
             pb_auth_response.user.email = data['user']['email']
@@ -123,13 +126,14 @@ class APIServicer(API_pb2_grpc.APIServicer):
                 return API_pb2.AuthResponse()
         print(f'LoginUser - Server {ID_SERVER} executing the action')
 
-        error, data = users.login_user(request, context)
+        error, data = users.login_user(self.LSMT, request, context)
         if error:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details(data['msg'])
             return API_pb2.AuthResponse()
         else:
             pb_auth_response = API_pb2.AuthResponse()
+            pb_auth_response.user.id = data['user']['id']
             pb_auth_response.user.username = data['user']['username']
             pb_auth_response.user.user_type = data['user']['user_type']
             pb_auth_response.user.email = data['user']['email']
@@ -159,9 +163,10 @@ class APIServicer(API_pb2_grpc.APIServicer):
             else:
                 print(f'GetMessages - Server {ID_SERVER} executing the action')
 
-                error, data = messages.get_messages(request, context)
+                error, data = messages.get_messages(self.LSMT, request, context)
                 for message in data['messages']:
                     pb_message = API_pb2.Message()
+                    pb_message.id = message['id']
                     pb_message.message = message['message']
                     pb_message.user.username = message['username']
                     pb_message.user.user_type = message['user_type']
@@ -202,13 +207,14 @@ class APIServicer(API_pb2_grpc.APIServicer):
                 print(e)
                 continue
 
-        error, data = messages.send_message(request, context)
+        error, data = messages.send_message(self.LSMT, request, context)
         if error:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details(data['msg'])
             return API_pb2.Message()
         else:
             pb_message = API_pb2.Message()
+            pb_message.id = data['message']['id']
             pb_message.user.username = data['message']['username']
             pb_message.user.user_type = data['message']['user_type']
             pb_message.message = data['message']['message']
@@ -221,7 +227,7 @@ class APIServicer(API_pb2_grpc.APIServicer):
             return API_pb2.Match()
 
         key = self.CH.hash(request.employee.username)
-        print(f'OfferJob - Server {ID_SERVER} / Username {request.employee.username} / Username key: {key}')
+        print(f'OfferJob - Employee Server {ID_SERVER} / Username {request.employee.username} / Username key: {key}')
 
         pb_node = self.CH.find_successor(key)
         if pb_node.server_id != ID_SERVER:
@@ -233,18 +239,39 @@ class APIServicer(API_pb2_grpc.APIServicer):
             except Exception as e:
                 print(e)
                 return API_pb2.Match()
+
+
+        key = self.CH.hash(request.recruiter.username)
+        print(f'OfferJob - Recruiter Server {ID_SERVER} / Username {request.recruiter.username} / Username key: {key}')
+
+        pb_node = self.CH.find_successor(key)
+        if pb_node.server_id != ID_SERVER:
+            print(f'OfferJob - Redirected to server {pb_node.server_id}')
+            try:
+                with grpc.insecure_channel(f'nerd_room_backend{pb_node.server_id}:{self.CH.default_port}') as channel:
+                    stub = API_pb2_grpc.APIStub(channel)
+                    stub.ReplicateOfferJob(request)
+            except Exception as e:
+                print(e)
+
         print(f'OfferJob - Server {ID_SERVER} executing the action')
 
-        error, data = matches.offer_job(request, context)
+        error, data = matches.offer_job(self.LSMT, request, context)
         if error:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details(data['msg'])
             return API_pb2.Match()
         else:
             pb_match = API_pb2.Match()
+            pb_match.id = data['match']['id']
             pb_match.recruiter.username = data['match']['recruiter']
             pb_match.employee.username = data['match']['employee']
             return pb_match
+
+    def ReplicateOfferJob(self, request, context):
+        empty = API_pb2.Empty()
+        matches.offer_job(self.LSMT, request, context)
+        return empty
 
     def GetMatches(self, request, context):
         if not self.CH.ready:
@@ -269,9 +296,10 @@ class APIServicer(API_pb2_grpc.APIServicer):
             else:
                 print(f'GetMatches - Server {ID_SERVER} executing the action')
 
-                error, data = matches.get_matches(request, context)
+                error, data = matches.get_matches(self.LSMT, request, context)
                 for match in data['matches']:
                     pb_match = API_pb2.Match()
+                    pb_match.id = match['id']
                     pb_match.recruiter.username = match['recruiter']
                     pb_match.employee.username = match['employee']
                     pb_match.recruiter_match = match['recruiter_match']
@@ -285,7 +313,7 @@ class APIServicer(API_pb2_grpc.APIServicer):
             return API_pb2.Match()
 
         key = self.CH.hash(request.employee.username)
-        print(f'AcceptMatch - Server {ID_SERVER} / Username {request.employee.username} / Username key: {key}')
+        print(f'AcceptMatch - Employee Server {ID_SERVER} / Username {request.employee.username} / Username key: {key}')
 
         pb_node = self.CH.find_successor(key)
         if pb_node.server_id != ID_SERVER:
@@ -297,18 +325,38 @@ class APIServicer(API_pb2_grpc.APIServicer):
             except Exception as e:
                 print(e)
                 return API_pb2.Match()
+
+        key = self.CH.hash(request.recruiter.username)
+        print(f'AcceptMatch - Recruiter Server {ID_SERVER} / Username {request.recruiter.username} / Username key: {key}')
+
+        pb_node = self.CH.find_successor(key)
+        if pb_node.server_id != ID_SERVER:
+            print(f'AcceptMatch - Redirected to server {pb_node.server_id}')
+            try:
+                with grpc.insecure_channel(f'nerd_room_backend{pb_node.server_id}:{self.CH.default_port}') as channel:
+                    stub = API_pb2_grpc.APIStub(channel)
+                    stub.ReplicateAcceptMatch(request)
+            except Exception as e:
+                print(e)
+
         print(f'AcceptMatch - Server {ID_SERVER} executing the action')
 
-        error, data = matches.accept_match(request, context)
+        error, data = matches.accept_match(self.LSMT, request, context)
         if error:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details(data['msg'])
             return API_pb2.Match()
         else:
             pb_match = API_pb2.Match()
+            pb_match.id = data['match']['id']
             pb_match.recruiter.username = data['match']['recruiter']
             pb_match.employee.username = data['match']['employee']
             return pb_match
+
+    def ReplicateAcceptMatch(self, request, context):
+        empty = API_pb2.Empty()
+        matches.accept_match(self.LSMT, request, context)
+        return empty
 
     def RejectMatch(self, request, context):
         if not self.CH.ready:
@@ -317,7 +365,7 @@ class APIServicer(API_pb2_grpc.APIServicer):
             return API_pb2.Match()
 
         key = self.CH.hash(request.employee.username)
-        print(f'RejectMatch - Server {ID_SERVER} / Username {request.employee.username} / Username key: {key}')
+        print(f'RejectMatch - Employee Server {ID_SERVER} / Username {request.employee.username} / Username key: {key}')
 
         pb_node = self.CH.find_successor(key)
         if pb_node.server_id != ID_SERVER:
@@ -329,22 +377,42 @@ class APIServicer(API_pb2_grpc.APIServicer):
             except Exception as e:
                 print(e)
                 return API_pb2.Match()
+
+        key = self.CH.hash(request.recruiter.username)
+        print(f'RejectMatch - Recruiter Server {ID_SERVER} / Username {request.recruiter.username} / Username key: {key}')
+
+        pb_node = self.CH.find_successor(key)
+        if pb_node.server_id != ID_SERVER:
+            print(f'RejectMatch - Redirected to server {pb_node.server_id}')
+            try:
+                with grpc.insecure_channel(f'nerd_room_backend{pb_node.server_id}:{self.CH.default_port}') as channel:
+                    stub = API_pb2_grpc.APIStub(channel)
+                    stub.ReplicateRejectMatch(request)
+            except Exception as e:
+                print(e)
+
         print(f'RejectMatch - Server {ID_SERVER} executing the action')
 
-        error, data = matches.reject_match(request, context)
+        error, data = matches.reject_match(self.LSMT, request, context)
         if error:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             context.set_details(data['msg'])
             return API_pb2.Match()
         else:
             pb_match = API_pb2.Match()
+            pb_match.id = data['match']['id']
             pb_match.recruiter.username = data['match']['recruiter']
             pb_match.employee.username = data['match']['employee']
             return pb_match
 
+    def ReplicateRejectMatch(self, request, context):
+        empty = API_pb2.Empty()
+        matches.reject_match(self.LSMT, request, context)
+        return empty
+
     def ReplicateMessage(self, request, context):
         print(f'ReplicateMessage - Server {ID_SERVER} executing the action')
-        messages.send_message(request.message, context)
+        messages.send_message(self.LSMT, request.message, context)
 
         replicated_message = request
 

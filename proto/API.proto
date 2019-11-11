@@ -7,7 +7,7 @@ enum USER_TYPE {
 }
 
 message User {
-    int32 id = 1;
+    string id = 1;
     string username = 2;
     USER_TYPE user_type = 3;
     string email = 4;
@@ -16,15 +16,17 @@ message User {
 }
 
 message Message {
-    User user = 1;
-    string message = 2;
+    string id = 1;
+    User user = 2;
+    string message = 3;
 }
 
 message Match {
-    User recruiter = 1;
-    User employee = 2;
-    int32 recruiter_match = 3;
-    int32 employee_match = 4;
+    string id = 1;
+    User recruiter = 2;
+    User employee = 3;
+    int32 recruiter_match = 4;
+    int32 employee_match = 5;
 }
 
 message AuthRequest {
@@ -61,9 +63,12 @@ service API {
     rpc SendMessage(Message) returns (Message) {}
     rpc ReplicateMessage(ReplicatedMessage) returns (Empty) {}
     rpc OfferJob(Match) returns (Match) {}
+    rpc ReplicateOfferJob(Match) returns (Empty) {}
     rpc GetMatches(User) returns (stream Match) {}
     rpc AcceptMatch(Match) returns (Match) {}
+    rpc ReplicateAcceptMatch(Match) returns (Empty) {}
     rpc RejectMatch(Match) returns (Match) {}
+    rpc ReplicateRejectMatch(Match) returns (Empty) {}
     rpc FloodNode(Node) returns (Empty) {}
     rpc FindSuccessor(RequestFindSuccessor) returns (Node) {}
 }

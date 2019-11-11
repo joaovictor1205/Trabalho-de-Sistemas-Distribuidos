@@ -121,16 +121,10 @@ class ConsistentHashing:
 
         self.ready = True
 
-        print(f'id: {self.server_id} - predecessor: {self.predecessor["server_id"]}')
-        for i in range(self.m):
-            print(f"{i} - {self.finger_table[i]['id']} - {self.finger_table[i]['succ']}")
-        print()
-
         # print(f'id: {self.server_id} - predecessor: {self.predecessor["server_id"]}')
-        # if self.server_id == 0:
-        #     key = self._hash('asdabsd asdhuasd asd asdasd')
-        #     target_node = self._find_successor(key)
-        #     print(target_node)
+        # for i in range(self.m):
+        #     print(f"{i} - {self.finger_table[i]['id']} - {self.finger_table[i]['succ']}")
+        # print()
 
     def flood(self, request):
         empty = API_pb2.Empty()

@@ -1,4 +1,4 @@
-import json
+import uuid
 import jwt
 import os
 
@@ -7,7 +7,7 @@ MESSAGES_PATH = 'archive/messages.json'
 SECRET = os.getenv('SECRET')
 
 
-def send_message(request, context):
+def send_message(LSMT, request, context):
     token = request.user.token
     decoded = jwt.decode(token, SECRET, algorithms=['HS256'])
     username = decoded['username']
@@ -16,33 +16,17 @@ def send_message(request, context):
         return True, {'msg': 'Wrong Credentials'}
 
     message = {
+        'id': str(uuid.uuid4()),
         'username': request.user.username,
         'user_type': request.user.user_type,
-        'message': request.message
+        'message': request.message,
+        'type': 'messages'
     }
 
-    if os.path.exists(MESSAGES_PATH):
-        with open(MESSAGES_PATH, 'r+') as json_file:
-            messages = json.load(json_file)
-            messages.append(message)
-
-            json_file.seek(0)
-            json.dump(messages, json_file)
-            json_file.truncate()
-
-            return False, {'message': message}
-    else:
-        with open(MESSAGES_PATH, 'w+') as json_file:
-            messages = [message]
-            json.dump(messages, json_file)
-
-            return False, {'message': message}
+    LSMT.create(message['id'], message)
+    return False, {'message': message}
 
 
-def get_messages(request, context):
-    if os.path.exists(MESSAGES_PATH):
-        with open(MESSAGES_PATH, 'r+') as json_file:
-            messages = json.load(json_file)
-            return False, {'messages': messages}
-    else:
-        return False, {'messages': []}
+def get_messages(LSMT, request, context):
+    messages = LSMT.search_multiple({'type': 'messages'})
+    return False, {'messages': messages}

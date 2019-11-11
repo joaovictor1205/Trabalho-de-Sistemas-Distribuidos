@@ -3,6 +3,7 @@
 # First argument -> hard / soft
 # Second argument -> dae / it
 # Third argument -> number of backend servers
+# Fourth argument -> keep / purge
 
 echo "Parsing Arguments"
 while [[ "$#" -gt 0 ]]
@@ -17,6 +18,9 @@ do
         -s|--servers)
             SERVERS="$2"
             ;;
+        -v|--volumes)
+            VOLUMES="$2"
+            ;;
     esac
     shift
 done
@@ -30,8 +34,10 @@ docker container rm -f nerd_room_frontend
 docker container ls -a | awk '{ print $1,$2 }' | grep nerd_room_backend_img | awk '{ print $1 }' | xargs -I {} docker container rm -f {}
 
 if [ "$BUILD" == "hard" ] ; then
-    echo "Deleting Volumes"
-    docker volume ls | awk '{ print $1,$2 }' | grep nerd_room_volume | awk '{ print $2 }' | xargs -I {} docker volume rm -f {}
+    if [ "$VOLUMES" == "purge" ] ; then
+        echo "Deleting Volumes"
+        docker volume ls | awk '{ print $1,$2 }' | grep nerd_room_volume | awk '{ print $2 }' | xargs -I {} docker volume rm -f {}
+    fi
 
     echo "Building Images"
     docker image build -t nerd_room_backend_img backend/
@@ -54,7 +60,7 @@ do
     OUT_PORT=$(($INITIAL_PORT + $i))
     echo $CONTAINER_NAME
 
-    if [ "$BUILD" == "hard" ] ; then
+    if [ "$VOLUMES" == "purge" ] ; then
         docker volume create ${VOLUME_NAME}
     fi
 

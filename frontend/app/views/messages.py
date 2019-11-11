@@ -22,6 +22,7 @@ def send_message():
         return {'error': True}
 
     return jsonify({
+        'id': message.id,
         'username': message.user.username,
         'user_type': message.user.user_type,
         'message': message.message
