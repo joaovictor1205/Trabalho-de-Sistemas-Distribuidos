@@ -54,7 +54,6 @@ class ConsistentHashing:
 
         found = False
 
-        # If is a value of the actual node
         if self.id < self.predecessor['id']:
             if self.predecessor['id'] < key <= self.MAX_ID or 0 <= key <= self.id:
                 target_node.id = str(self.id)
