@@ -21,6 +21,11 @@ message Message {
     string message = 3;
 }
 
+message ReplicatedMessage {
+    Message message = 1;
+    repeated Node nodes = 2;
+}
+
 message Match {
     string id = 1;
     User recruiter = 2;
@@ -42,15 +47,13 @@ message AuthResponse {
 message Node {
     string id = 1;
     int32 server_id = 2;
+    string host = 3;
+    int32 port = 4;
+    Node predecessor = 5;
 }
 
 message RequestFindSuccessor {
     string key = 1;
-}
-
-message ReplicatedMessage {
-    Message message = 1;
-    repeated Node nodes = 2;
 }
 
 message Empty {}
@@ -69,6 +72,7 @@ service API {
     rpc ReplicateAcceptMatch(Match) returns (Empty) {}
     rpc RejectMatch(Match) returns (Match) {}
     rpc ReplicateRejectMatch(Match) returns (Empty) {}
-    rpc FloodNode(Node) returns (Empty) {}
     rpc FindSuccessor(RequestFindSuccessor) returns (Node) {}
+    rpc Notify(Node) returns (Empty) {}
+    rpc GetPredecessor(Empty) returns (Node) {}
 }

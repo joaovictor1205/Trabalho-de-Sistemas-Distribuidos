@@ -1,6 +1,4 @@
 from threading import Lock, Timer
-import sched
-import time
 import json
 import os
 
@@ -10,7 +8,7 @@ SNAPS_FOLDER_PATH = '/code/archive/snaps/'
 lock = Lock()
 
 class LogStructureMergeTree:
-    def __init__(self, memtable_limit=2, snapshot_time=60):
+    def __init__(self, memtable_limit=15, snapshot_time=300):
         self.memtable = {}
         self.memtable_limit = memtable_limit
         self.snapshot_time = snapshot_time

@@ -19,7 +19,7 @@ def register_user(LSMT, request, context):
     aux_user = LSMT.search({'type': 'users', 'username': user['username']})
 
     if aux_user:
-        return True, {'msg': 'User already exists'}, None
+        return True, {'msg': 'User already exists'}
 
     LSMT.create(user['id'], user)
     token = jwt.encode({'username': user['username']}, SECRET, algorithm='HS256')
